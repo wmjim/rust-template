@@ -11,45 +11,59 @@ on:
       - master
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build-rust:
-    strategy:
-      matrix:
-        platform: [ubuntu-latest]
-    runs-on: ${{ matrix.platform }}
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           submodules: recursive
       - name: Install Rust
-        run: rustup toolchain install stable --component llvm-tools-preview
-      - name: Install cargo-llvm-cov
-        uses: taiki-e/install-action@cargo-llvm-cov
+        run: rustup show
       - name: install nextest
         uses: taiki-e/install-action@nextest
       - uses: Swatinem/rust-cache@v2
       - name: Check code format
         run: cargo fmt -- --check
       - name: Check the package for errors
-        run: cargo check --all
+        run: cargo check --workspace
       - name: Lint rust sources
-        run: cargo clippy --all-targets --all-features --tests --benches -- -D warnings
+        run: cargo clippy --all-targets --all-features -- -D warnings
       - name: Execute rust tests
         run: cargo nextest run --all-features --no-tests=pass
+
+  msrv:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # keep in sync with rust-version in Cargo.toml
+      - name: Install MSRV toolchain
+        run: rustup toolchain install 1.85.0 --profile minimal --no-self-update
+      - name: Check against MSRV
+        run: cargo +1.85.0 check --workspace --all-features
+
+  release:
+    needs: build-rust
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - name: Generate a changelog
-        uses: orhun/git-cliff-action@v2
+        uses: orhun/git-cliff-action@v4
         id: git-cliff
-        if: startsWith(github.ref, 'refs/tags/')
         with:
           config: cliff.toml
           args: -vv --latest --strip header
         env:
           OUTPUT: CHANGES.md
       - name: Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v3
         with:
           body: ${{ steps.git-cliff.outputs.content }}
