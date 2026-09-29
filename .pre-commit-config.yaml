@@ -27,9 +27,9 @@ repos:
       - id: cargo-deny
         name: cargo deny check
         description: Check cargo dependencies
-        entry: bash -c 'cargo deny check -d'
+        entry: bash -c 'cargo deny check'
         language: rust
-        files: \.rs$
+        files: '(^|/)(Cargo\.lock|Cargo\.toml|deny\.toml|.*\.rs)$'
         args: []
       - id: typos
         name: typos
@@ -55,7 +55,7 @@ repos:
       - id: cargo-test
         name: cargo test
         description: unit test for the project
-        entry: bash -c 'cargo nextest run --all-features'
+        entry: bash -c 'cargo nextest run --all-features --no-tests=pass'
         language: rust
         files: \.rs$
         pass_filenames: false
