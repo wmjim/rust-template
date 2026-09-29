@@ -1,0 +1,4 @@
+# cliff.toml contains git-cliff's own {{ }} template syntax, which
+# cargo-generate would otherwise reject while substituting.
+[template]
+exclude = ["cliff.toml"]
