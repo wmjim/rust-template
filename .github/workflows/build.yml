@@ -13,6 +13,9 @@ on:
 permissions:
   contents: read
 
+env:
+  GENERATED_PROJECT: generated-from-template
+
 jobs:
   build-rust:
     runs-on: ubuntu-latest
@@ -21,29 +24,46 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
+      # This repository is the template, and a manifest holding a
+      # cargo-generate placeholder is not a valid crate. Everywhere else the
+      # checkout already is the project, so the checks below run against a
+      # project generated from the template instead.
+      - name: Install cargo-generate
+        if: github.repository == 'wmjim/rust-template'
+        uses: taiki-e/install-action@cargo-generate
+      - name: Pick the directory to check
+        run: |
+          if [ "$GITHUB_REPOSITORY" = "wmjim/rust-template" ]; then
+            cargo generate --path . --name "$GENERATED_PROJECT" --destination "$RUNNER_TEMP"
+            echo "WORKDIR=$RUNNER_TEMP/$GENERATED_PROJECT" >> "$GITHUB_ENV"
+          else
+            echo "WORKDIR=$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
+          fi
       - name: Install Rust
         run: rustup show
+        working-directory: ${{ env.WORKDIR }}
       - name: install nextest
         uses: taiki-e/install-action@nextest
       - uses: Swatinem/rust-cache@v2
+        if: github.repository != 'wmjim/rust-template'
       - name: Check code format
         run: cargo fmt -- --check
+        working-directory: ${{ env.WORKDIR }}
       - name: Check the package for errors
         run: cargo check --workspace
+        working-directory: ${{ env.WORKDIR }}
       - name: Lint rust sources
         run: cargo clippy --all-targets --all-features -- -D warnings
+        working-directory: ${{ env.WORKDIR }}
       - name: Execute rust tests
         run: cargo nextest run --all-features --no-tests=pass
-
-  msrv:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
+        working-directory: ${{ env.WORKDIR }}
       # keep in sync with rust-version in Cargo.toml
       - name: Install MSRV toolchain
         run: rustup toolchain install 1.85.0 --profile minimal --no-self-update
       - name: Check against MSRV
         run: cargo +1.85.0 check --workspace --all-features
+        working-directory: ${{ env.WORKDIR }}
 
   release:
     needs: build-rust
