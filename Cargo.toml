@@ -1,9 +1,15 @@
 [package]
 name = "template"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
+rust-version = "1.85"
 license = "MIT"
+description = "A Rust project template with CI, linting, and release automation."
+repository = "https://github.com/wmjim/rust-template"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+
+[lints.rust]
+unsafe_code = "deny"
