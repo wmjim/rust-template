@@ -13,17 +13,20 @@ repos:
       - id: trailing-whitespace
   - repo: local
     hooks:
+      # The hooks below need a crate to inspect. In the template repository the
+      # package name holds a cargo-generate placeholder, so they stand aside
+      # there and run normally in a project generated from the template.
       - id: cargo-fmt
         name: cargo fmt
         description: Format files with rustfmt.
-        entry: bash -c 'cargo fmt -- --check'
+        entry: bash -c 'grep -q "^name *= *.{" Cargo.toml && exit 0; cargo fmt -- --check'
         language: rust
         files: \.rs$
         args: []
       - id: cargo-deny
         name: cargo deny check
         description: Check cargo dependencies
-        entry: bash -c 'cargo deny check'
+        entry: bash -c 'grep -q "^name *= *.{" Cargo.toml && exit 0; cargo deny check'
         language: rust
         files: '(^|/)(Cargo\.lock|Cargo\.toml|deny\.toml|.*\.rs)$'
         args: []
@@ -37,21 +40,21 @@ repos:
       - id: cargo-check
         name: cargo check
         description: Check the package for errors.
-        entry: bash -c 'cargo check --workspace'
+        entry: bash -c 'grep -q "^name *= *.{" Cargo.toml && exit 0; cargo check --workspace'
         language: rust
         files: \.rs$
         pass_filenames: false
       - id: cargo-clippy
         name: cargo clippy
         description: Lint rust sources
-        entry: bash -c 'cargo clippy --all-targets --all-features -- -D warnings'
+        entry: bash -c 'grep -q "^name *= *.{" Cargo.toml && exit 0; cargo clippy --all-targets --all-features -- -D warnings'
         language: rust
         files: \.rs$
         pass_filenames: false
       - id: cargo-test
         name: cargo test
         description: unit test for the project
-        entry: bash -c 'cargo nextest run --all-features --no-tests=pass'
+        entry: bash -c 'grep -q "^name *= *.{" Cargo.toml && exit 0; cargo nextest run --all-features --no-tests=pass'
         language: rust
         files: \.rs$
         pass_filenames: false
