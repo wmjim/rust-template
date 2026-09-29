@@ -1,83 +1,62 @@
-# Geektime Rust 语言训练营
+# Rust Template
 
-## 环境设置
+一个开箱即用的 Rust 项目模板：固定工具链、提交前检查、CI 与自动发版。
 
-### 安装 Rust
+## 包含什么
 
-```bash
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-```
+| 文件 | 作用 |
+| --- | --- |
+| `rust-toolchain.toml` | 固定工具链版本并声明 `rustfmt` / `clippy` 组件，本地与 CI 用同一个编译器 |
+| `Cargo.toml` | edition 2024，声明 `rust-version`（MSRV），`[lints]` 中 deny `unsafe_code` |
+| `.pre-commit-config.yaml` | 格式化、lint、测试、依赖检查、拼写检查 |
+| `.github/workflows/build.yml` | 三个 job：构建检查、MSRV 验证、tag 触发的发版 |
+| `.github/dependabot.yml` | 跟踪 action、pre-commit hook、工具链与依赖的版本更新 |
+| `deny.toml` | 依赖的许可证与安全公告策略 |
+| `cliff.toml` | 由 commit 生成 changelog |
 
-### 安装 VSCode 插件
-
-- crates: Rust 包管理
-- Even Better TOML: TOML 文件支持
-- Better Comments: 优化注释显示
-- Error Lens: 错误提示优化
-- GitLens: Git 增强
-- Github Copilot: 代码提示
-- indent-rainbow: 缩进显示优化
-- Prettier - Code formatter: 代码格式化
-- REST client: REST API 调试
-- rust-analyzer: Rust 语言支持
-- Rust Test lens: Rust 测试支持
-- Rust Test Explorer: Rust 测试概览
-- TODO Highlight: TODO 高亮
-- vscode-icons: 图标优化
-- YAML: YAML 文件支持
-
-### 安装 cargo generate
-
-cargo generate 是一个用于生成项目模板的工具。它可以使用已有的 github repo 作为模版生成新的项目。
+## 使用
 
 ```bash
-cargo install cargo-generate
+git clone https://github.com/wmjim/rust-template
+cd rust-template
 ```
 
-在我们的课程中，新的项目会使用 `tyr-rust-bootcamp/template` 模版生成基本的代码：
+### 开发
+
+工具链无需手动安装：进入仓库后 rustup 会按 `rust-toolchain.toml` 自动装好固定版本及其组件。
 
 ```bash
-cargo generate tyr-rust-bootcamp/template
+cargo run
+cargo nextest run --all-features   # 或 cargo test
+cargo fmt
+cargo clippy --all-targets --all-features -- -D warnings
 ```
 
-### 安装 pre-commit
-
-pre-commit 是一个代码检查工具，可以在提交代码前进行代码检查。
+### 提交前检查
 
 ```bash
-pipx install pre-commit
+pipx install pre-commit   # 或 pip install pre-commit
+pre-commit install
 ```
 
-安装成功后运行 `pre-commit install` 即可。
-
-### 安装 Cargo deny
-
-Cargo deny 是一个 Cargo 插件，可以用于检查依赖的安全性。
+### 依赖检查
 
 ```bash
 cargo install --locked cargo-deny
+cargo deny check
 ```
 
-### 安装 typos
-
-typos 是一个拼写检查工具。
-
-```bash
-cargo install typos-cli
-```
-
-### 安装 git cliff
-
-git cliff 是一个生成 changelog 的工具。
+### 生成 changelog
 
 ```bash
 cargo install git-cliff
+git-cliff -o CHANGELOG.md
 ```
 
-### 安装 cargo nextest
+## 发版
 
-cargo nextest 是一个 Rust 增强测试工具。
+推一个 `v*` 形式的 tag 即可：CI 会跑完构建检查，再用 git-cliff 生成本次 changelog 作为 GitHub Release 的内容。
 
-```bash
-cargo install cargo-nextest --locked
-```
+## License
+
+MIT
