@@ -30,7 +30,9 @@ jobs:
       # project generated from the template instead.
       - name: Install cargo-generate
         if: github.repository == 'wmjim/rust-template'
-        uses: taiki-e/install-action@cargo-generate
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-generate
       - name: Pick the directory to check
         run: |
           if [ "$GITHUB_REPOSITORY" = "wmjim/rust-template" ]; then
