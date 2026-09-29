@@ -1,6 +1,8 @@
 # Rust Template
 
 > 本 README 描述的是模板本身。生成项目后请换成你自己项目的说明。
+>
+> 本模板基于 [tyr-rust-bootcamp/template](https://github.com/tyr-rust-bootcamp/template) 继续维护，上游 master 自 2024-03 起没有新提交。
 
 一个开箱即用的 Rust 项目模板：统一 stable 工具链、提交前检查、CI 与自动发版。
 
