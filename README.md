@@ -27,6 +27,8 @@ cargo generate wmjim/rust-template --name my-project
 cd my-project
 ```
 
+刚生成的项目由 `git init` 建出，没有初始提交、也没有跟踪任何文件，所以第一次提交要用 `git add -A && git commit`：这里 `git commit -a` 不会暂存任何东西，钩子也就无从运行。钩子本身还需要先在本项目里执行 `pre-commit install` 才生效（见下文「提交前检查」）。
+
 ### 生成后需要手工处理的几处
 
 占位符只能替换 Liquid 认得出的内容，以下三处仍指向模板作者：
